@@ -50,6 +50,14 @@ public class ProductController {
         return productsDto.transformDto(product);
     }
 
+    @GetMapping("/produce")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProductDto> produceProduct() {
+        var products = productService.produceProduct();
+        var productsDto = new ProductDto();
+        return productsDto.transformListDtos(products);
+    }
+
     @DeleteMapping("/{productId}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void deleteProduct(@PathVariable(value = "producId") Long productId) {
