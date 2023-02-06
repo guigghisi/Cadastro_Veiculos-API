@@ -8,6 +8,7 @@ import com.projedata.sms.repository.RawMaterialRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,11 +16,11 @@ import java.util.stream.Collectors;
 @Service
 public class ProductService {
     private final ProductRepository repository;
-    private final RawMaterialRepository rawMaterialRepositoryRepository;
+    private final RawMaterialRepository rawMaterialRepository;
 
-    public ProductService(ProductRepository repository, RawMaterialRepository rawMaterialRepositoryRepository) {
+    public ProductService(ProductRepository repository, RawMaterialRepository rawMaterialRepository) {
         this.repository = repository;
-        this.rawMaterialRepositoryRepository = rawMaterialRepositoryRepository;
+        this.rawMaterialRepository = rawMaterialRepository;
     }
 
     public Product createNewProduct(Product product) {
@@ -50,33 +51,38 @@ public class ProductService {
 
     public List produceProduct() {
         var products = repository.findAllOrderByPriceDesc();
-        var manufacturedProducts = List.of();
-        var rawMaterials = rawMaterialRepositoryRepository.findAll();
+        var manufacturedProducts = new ArrayList<Product>();
+        var rawMaterials = rawMaterialRepository.findAll();
         Map<RawMaterial, Integer> availableRawMaterials = rawMaterials.stream().collect(Collectors.toMap(rawMaterial -> rawMaterial, RawMaterial::getStocked));
         var totalValue = BigDecimal.ZERO;
-
-
-        for (var currentProduct = 0; currentProduct < products.size(); ) {
-
+        var productRawMaterialCount = repository.findProductRawMaterialCount();
+        for (int i = 0; i < products.size(); i++) {
+            Product product = products.get(i);
             boolean canProduce = true;
-            for (var rawMaterial : products.get(currentProduct).getRawMaterials()) {
-                if (availableRawMaterials.get(rawMaterial) == null || availableRawMaterials.get(rawMaterial) < rawMaterial.getStocked()) {
-                    canProduce = false;
-                    break;
+            for (Object[] productRawMaterial : productRawMaterialCount) {
+                if (productRawMaterial[0].equals(product.getId())) {
+                    RawMaterial rawMaterial = rawMaterialRepository.findById((Long) productRawMaterial[1]).orElse(null);
+                    if (availableRawMaterials.get(rawMaterial) == null || availableRawMaterials.get(rawMaterial) < ((Long) productRawMaterial[2]).intValue()) {
+                        canProduce = false;
+                        break;
+                    }
                 }
             }
             if (canProduce) {
-                manufacturedProducts.add(products.get(currentProduct));
-                totalValue = totalValue.add(products.get(currentProduct).getPrice());
-                for (var rawMaterial : products.get(currentProduct).getRawMaterials()) {
-                    availableRawMaterials.put(rawMaterial, availableRawMaterials.get(rawMaterial) - rawMaterial.getStocked());
+                manufacturedProducts.add(product);
+                totalValue = totalValue.add(product.getPrice());
+                for (Object[] productRawMaterial : productRawMaterialCount) {
+                    if (productRawMaterial[0].equals(product.getId())) {
+                        RawMaterial rawMaterial = rawMaterialRepository.findById((Long) productRawMaterial[1]).orElse(null);
+                        availableRawMaterials.put(rawMaterial, availableRawMaterials.get(rawMaterial) - ((Long) productRawMaterial[2]).intValue());
+                    }
                 }
-            } else {
-                products.remove(currentProduct);
-                currentProduct++;
+                i--;
             }
         }
-        return List.of(products, totalValue);
+        return manufacturedProducts;
     }
 
+
 }
+
