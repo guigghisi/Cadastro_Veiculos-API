@@ -49,7 +49,7 @@ public class ProductService {
     }
 
     public List produceProduct() {
-        var products = repository.findProductByPriceOrderByPriceDesc();
+        var products = repository.findAllOrderByPriceDesc();
         var manufacturedProducts = List.of();
         var rawMaterials = rawMaterialRepositoryRepository.findAll();
         Map<RawMaterial, Integer> availableRawMaterials = rawMaterials.stream().collect(Collectors.toMap(rawMaterial -> rawMaterial, RawMaterial::getStocked));

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/raw-materials")
 public class RawMaterialController {
@@ -15,6 +16,7 @@ public class RawMaterialController {
     public RawMaterialController(RawMaterialService rawMaterialService) {
         this.rawMaterialService = rawMaterialService;
     }
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

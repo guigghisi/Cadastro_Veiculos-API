@@ -10,11 +10,13 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class RawMaterialDto {
+    private Long id;
     private String name;
     private Integer stocked;
 
     public RawMaterial transformEntity() {
         var rawMaterial = new RawMaterial();
+        rawMaterial.setId(id);
         rawMaterial.setName(name);
         rawMaterial.setStocked(stocked);
         return rawMaterial;
@@ -24,6 +26,7 @@ public class RawMaterialDto {
         var rawMaterialDto = new RawMaterialDto();
         rawMaterialDto.setName(rawMaterial.getName());
         rawMaterialDto.setStocked(rawMaterial.getStocked());
+        rawMaterialDto.setId(rawMaterial.getId());
         return rawMaterialDto;
     }
 
