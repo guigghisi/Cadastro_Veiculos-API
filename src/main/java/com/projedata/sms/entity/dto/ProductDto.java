@@ -12,12 +12,14 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class ProductDto {
+    private Long id;
     private String name;
     private BigDecimal price;
     private List<RawMaterial> rawMaterials;
 
     public Product transformEntity() {
         var product = new Product();
+        product.setId(id);
         product.setName(name);
         product.setPrice(price);
         product.setRawMaterials(rawMaterials);
@@ -26,6 +28,7 @@ public class ProductDto {
 
     public ProductDto transformDto(Product product) {
         var productDto = new ProductDto();
+        productDto.setId(product.getId());
         productDto.setName(product.getName());
         productDto.setPrice(product.getPrice());
         productDto.setRawMaterials(product.getRawMaterials());
